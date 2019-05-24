@@ -1,10 +1,13 @@
 [![build pass](https://api.travis-ci.org/dwqs/area-puppeteer.svg?branch=master)](https://travis-ci.org/dwqs/area-puppeteer?branch=master) ![license](https://img.shields.io/badge/license-WTFPL%20--%20Do%20What%20the%20Fuck%20You%20Want%20to%20Public%20License-green.svg)
 
+# 变更
+更新2018数据，基于[2018统计用区划代码和城乡划分代码](http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/index.html)，因暂时2019数据还没出来，后续更新再说。生成的匹配数据用于[地区级联组件](https://github.com/ManfredHu/hu-vue3-template-js)
+
 # area-puppeteer
 基于 puppeteer 的中国行政区域抓取爬虫
 
 ## 数据来源
-* 国家统计局：[统计用区划代码和城乡划分代码](http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/index.html)
+* 国家统计局：[统计用区划代码和城乡划分代码](http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/index.html)
 * 国家民政部：[中华人民共和国行政区划代码](http://www.mca.gov.cn/article/sj/tjbz/a/)
 
 ## 数据更新

@@ -17,7 +17,7 @@ const spinner2 = ora({
 
 const provinces = require('./provinces')['86'];
 const pcodes = [];
-const target = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/#{route}.html';
+const target = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/#{route}.html';
 
 let cities = [];
 
@@ -44,6 +44,7 @@ async function getCitiesByPCode (page, pcode) {
     url = target.replace('#{route}', pcode);
     const parentCode = `${pcode}0000`;
 
+    console.log('\ngoto url', url)
     await page.goto(url);
 
     spinner1.text = chalk.blue(`正在抓取${provinces[parentCode]}的市级数据：${url}`);
@@ -59,12 +60,14 @@ async function getCitiesByPCode (page, pcode) {
                 parentCode: parentCode
             });
         });
+        console.log('cities', cities)
         return cities;
     }, parentCode, cities);
 }
 
 async function getAreasByCCode (page, city) {
     url = target.replace('#{route}', `${city.code.slice(0, 2)}/${city.code.slice(0, 4)}`);
+    console.log('\ngoto url', url)
     await page.goto(url);
 
     spinner2.text = chalk.blue(`正在抓取 ${provinces[city.parentCode]}/${city.text} 的县区数据：${url}`);
@@ -118,22 +121,34 @@ process.on('unhandledRejection', (err) => {
     }
 
     type = 1;
-    console.log('\n');
     spinner2.start(chalk.blue('正在抓取县区数据....'));
 
     for(let i = 0, l = cities.length; i < l; i++) {
         const city = cities[i];
         await timeout(3000);
-        const [err] = await awaitTo(getAreasByCCode(page, city));
-        if (err) {
-            // 这个重试主要是处理因避免耗时(Navigation Timeout Exceeded)导致的错误
-            console.log('\n', chalk.red(`抓取数据失败，失败链接: ${url}，错误信息: ${err.message}，正在重试....\n`));
-            await getAreasByCCode(page, city);
-        }
+        // 错误就重试直到成功
+        loopGetData(getAreasByCCode, page, city)
+        loopGetData.len = 0;
     }
-
-    writeFileSync('areas.js', areas);
-    spinner2.succeed(chalk.green('县区数据抓取完毕'));
-
-    await browser.close();
+    
+    //可能有数据还没爬完，等待30s再关闭
+    setTimeout(async () => {
+        writeFileSync('areas.js', areas);
+        spinner2.succeed(chalk.green('县区数据抓取完毕'));
+        await browser.close();
+    }, 30 * 1000)
 })();
+
+async function loopGetData(func, page, city) {
+    const [err] = await awaitTo(func(page, city));
+    if (err) {
+        loopGetData.len++;
+        if(loopGetData.len > 10) {
+            return; //超过10次则不重试
+        }
+        chalk.green(`${url} 数据抓取错误，重试`)
+        // 这个重试主要是处理因避免耗时(Navigation Timeout Exceeded)导致的错误
+        console.log('\n', chalk.red(`抓取数据失败，失败链接: ${url}，错误信息: ${err.message}，正在重试....\n`));
+        loopGetData(...arguments)
+    }
+}
