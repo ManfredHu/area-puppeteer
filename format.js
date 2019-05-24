@@ -11,7 +11,7 @@ const { timeout, writeFileSync } = require('./utils');
 const provinces = require('./provinces');
 const cities = require('./cities');
 const areas = require('./areas');
-const pcodes = Object.keys(provinces['86']);
+const pcodes = Object.keys(provinces['100000']);
 
 /** 
  * 四个直辖市会将「市辖区」作为二级行政区域
@@ -24,19 +24,19 @@ const filter = ['市辖区', '县', '省直辖县级行政区划', '自治区直
 
 // 省市
 const pca = {
-    '86': provinces['86']
+    '100000': provinces['100000']
 };
 // 删除港澳
-delete pca['86']['910000'];
+delete pca['100000']['910000'];
 
 // 省市区
 const pcaa = {
-    '86': provinces['86']
+    '100000': provinces['100000']
 };
 
 // 提取行政区域 code
 const reg = /0(?=0{2,})/;
-const target = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/#{route}.html';
+const target = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/#{route}.html';
 
 const spinner = ora({
     color: 'yellow'
@@ -60,8 +60,8 @@ function formatPCAddress () {
             pca[pcode] = provinces['710100'];
         } else if (pcode === '910000') {
             // 港澳
-            pca['86']['810000'] = '香港特别行政区';
-            pca['86']['820000'] = '澳门特别行政区';
+            pca['100000']['810000'] = '香港特别行政区';
+            pca['100000']['820000'] = '澳门特别行政区';
             pca['810000'] = provinces['810000'];
             pca['820000'] = provinces['820000'];
             // const t = provinces[pcode];
@@ -191,9 +191,13 @@ async function formatPCAAddress () {
         }
     }
 
-    writeFileSync('pcaa.js', pcaa);
-    await browser.close();
+    
+    //可能有数据还没爬完，等待30s再关闭
+    setTimeout(async () => {
+        writeFileSync('pcaa.js', pcaa);
+        await browser.close();
+    }, 30 * 1000)
 }
 
-formatPCAddress()
+// formatPCAddress()
 formatPCAAddress();

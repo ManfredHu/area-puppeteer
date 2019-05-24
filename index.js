@@ -15,7 +15,7 @@ const spinner2 = ora({
     color: 'yellow'
 });
 
-const provinces = require('./provinces')['86'];
+const provinces = require('./provinces')['100000'];
 const pcodes = [];
 const target = 'http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2018/#{route}.html';
 
